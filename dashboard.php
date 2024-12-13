@@ -16,26 +16,21 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>dashboard</title>
- <!-- dataTable CSS -->
- <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" /> -->
-<!-- bootstrap -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.8/datatables.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css" rel="stylesheet">
 
-<!-- jquery -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-  <script src="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js" integrity="sha512-KFHXdr2oObHKI9w4Hv1XPKc898mE4kgYx58oqsc/JqqdLMDI4YjOLzom+EMlW8HFUd0QfjfAvxSL6sEq/a42fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <?php include '../Layout/header.php'; ?>
 
 </head>
+
 <body>
 <!-- user email(login) -->
-<!-- <div class="content-wrapper">
-    <h6>Welcome , <?php print_r($_SESSION['email'])?></h6>
-</div>  -->
+<div class="content-wrapper">
+<?php
+if(!isset( $_SESSION['email'])){
+    header("Location: login.php");
+    exit();
+}
+?>
+</div> 
 
 <div class="my-5">
 <!--Add user button -->
@@ -43,7 +38,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
 </div>
 
 <!-- Add pop up Modal form -->
-<div class="modal fade" tabindex="-1" role="dialog" id="userModal">
+<div class="modal fade" tabindex="-1" role="dialog" id="userModal" aria-hidden="true">
 <div class="modal-dialog" role="document">
 <div class="modal-content">
 
@@ -54,7 +49,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
     </button>
 </div>
 
-    <form method="POST" id="addUser">
+    <form method="POST" id="addUser" enctype="multipart/form-data">
 
     <div class="modal-body">
 
@@ -107,6 +102,11 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
         <label class="form-label">Locked:</label>
         <input type="text" class="form-control" name="locked" id="locked">       
     </div>
+
+    <div class="mb-3">
+        <label class="form-label">Image:</label>
+        <input type="file" class="form-control" name="image[]" id="image" multiple>
+    </div>
     
     <div class="modal-footer">
     <button type="button" class="btn btn-secondary"  data-bs-dismiss="modal">Close</button>
@@ -135,6 +135,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
         <th scope="col">Phone</th>
         <th scope="col">Notification</th>
         <th scope="col">Locked</th>
+        <th scope="col">Image</th>
         <th scope="col">Action</th>
        
     </thead>
@@ -143,7 +144,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
 </table>
 
 <!-- Edit pop up modal form --> 
-<div class="modal fade" tabindex="-1" role="dialog" id="editModal">
+<div class="modal fade" tabindex="-1" role="dialog" id="editModal" aria-hidden="false">
 <div class="modal-dialog" role="document">
 <div class="modal-content">
 
@@ -151,7 +152,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
       <h5 class="modal-title">Update User</h5>
     </div>
 
-    <form method="POST" id="editUser">
+    <form method="POST" id="editUser" enctype="multipart/form-data">
         <input type="hidden" name="editId" id="editId">
         
     <div class="modal-body">
@@ -205,6 +206,14 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
         <label class="form-label">Locked:</label>
         <input type="text" class="form-control" name="locked" id="ulocked">       
     </div>
+
+    <div class="mb-3">
+        <label class="form-label">Image:</label>
+        <input type="file" class="form-control" id="editImage" name="image[]" multiple>         
+        <input type="hidden" name="oldPhoto" id="oldImage">
+        <!-- <img src="" id="oldPhoto" width="100px" height="100px"> -->
+        <div id="oldPhoto"></div>
+    </div>
     
     <div class="modal-footer">
     <button type="button" class="btn btn-secondary"  data-bs-dismiss="modal">Close</button>
@@ -217,21 +226,15 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
   </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-<script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.8/datatables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js" integrity="sha512-KFHXdr2oObHKI9w4Hv1XPKc898mE4kgYx58oqsc/JqqdLMDI4YjOLzom+EMlW8HFUd0QfjfAvxSL6sEq/a42fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.14.5/sweetalert2.min.js" integrity="sha512-JCDnPKShC1tVU4pNu5mhCEt6KWmHf0XPojB0OILRMkr89Eq9BHeBP+54oUlsmj8R5oWqmJstG1QoY6HkkKeUAg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<?php include '../Layout/footer.php';  ?>
 
 <!-- data table display -->
 <script type="text/javascript">
 $(document).ready(function(){
-
 $('#userTable').DataTable({
     "responsive" : true,
     "processing" : true,
-    "serverSide": true,
+    "serverSide": false,
     "destroy" :true,
     "ordering" : true,
     "autoWidth" :true,
@@ -239,21 +242,21 @@ $('#userTable').DataTable({
         "type" : "POST",
         "url" : "<?php echo EXEC ?>Exec_User.php?task=display",
          "dataSrc": "data",
-        "error": function(xhr, status, error) {
+        "error": function(xhr, status, error){
                 console.error("AJAX Error:", error);
                 console.log("Response Text:", xhr.responseText);
-                alert("AJAX Request Failed");
+                //alert("AJAX Request Failed");
               },
             },
         "columns": [
-        {
-            "data": null,
-            "sortable": false,
-            render: function(data, type, row, meta) {
-            return meta.row + meta.settings._iDisplayStart + 1;
-            }
-        },
-       //{"data": "id"},
+        // {
+        //     "data": null,
+        //     "sortable": false,
+        //     render: function(data, type, row, meta) {
+        //    //return meta.row + meta.settings._iDisplayStart + 1;
+        //     }
+        // },
+        {"data": "id"},
         {"data": "firstname"},
         {"data": "lastname"},
         {"data": "email"},
@@ -264,9 +267,10 @@ $('#userTable').DataTable({
         {"data": "phone"},
         {"data": "notification"},
         {"data": "locked"},
+        {"data": "image"},
         {
             "data": "id",
-            "render": function(data, type, row) {
+            "render": function(data, type, row){
                 let encodedId = window.btoa(data);
                 return '<a href="javascript:void()" id="btnEdit" title="Edit Address" class="btn btn-primary"  data-id="' + encodedId + '"><i class="fa-regular fa-pen-to-square"></i></a><a href="javascript:void()" id="btnDelete" value="Update" title="Delete Address" class="btn btn-danger deleteBtn" data-id="' + data + '"><i class="fa-solid fa-trash"></i></a>';
                      
@@ -316,6 +320,9 @@ $("#addUser").validate({
         locked:{
             required: true,
         },
+        image:{
+            required: true,
+        },
     },
     messages:{
         firstname:{
@@ -349,6 +356,9 @@ $("#addUser").validate({
         },
         locked:{
             required: 'Please enter Locked.',
+        },
+        image:{
+            required: 'Please Upload Image.',
         },
     },
     errorClass: 'text-danger',
@@ -432,45 +442,41 @@ $('#editUser').validate({
 // Add Modal open when button(add_user)click
 $(document).ready(function(){
 $('#btnAdd').on('click',function(){
-  
-   $('#userModal').modal('show');
-   
-});
+    $('#userModal').modal('show');
 
 // Insert data into db
-$(document).on('click','#save',function(e) {
+$(document).on('click','#save',function(e){
             e.preventDefault();
             let isValid = $("#addUser").valid();
+
             if (isValid) {
                 let data = new FormData($("#addUser")[0]);
                 
-                alert('ndjck');
                 $.ajax({
                     url: "<?php echo EXEC ?>Exec_User.php?task=add",
                     type: "POST",
                     dataType: "JSON",
+                    data: data,
                     cache: false,
                     async: true,
                     processData: false,
                     contentType: false,
-                    data: data,
-                    success: function(data) {
-                        alert('jdkf');
-                        if(data.statusCode == 200) {
-                            console.log('success');
+                    success: function(result){
+                        if(result.statusCode == 200){
                             Swal.fire(
                                 'Good job!',
-                                '' + data.message + '',
+                                '' + result.message + '',
                                 'success'
                             )
-                            $('#location').val("");
                             $('#userModal').modal('hide');
+                            $("#userTable").DataTable().ajax.reload();
                         }
                     }                    
                 })
             }
         });
     });
+});
 
 // Edit Modal open when update button click
 $(document).on('click', '#btnEdit', function () {
@@ -486,10 +492,8 @@ $(document).on('click', '#btnEdit', function () {
         data: { 
             id: id
          },
+        success: function(response){
 
-        success: function (response) {
-            //console.log('Response:', response);
-            
             $('#editId').val(response.data.id);
             $('#ufirstname').val(response.data.firstname);
             $('#ulastname').val(response.data.lastname);
@@ -500,27 +504,34 @@ $(document).on('click', '#btnEdit', function () {
             $('#uagentcompany').val(response.data.agentcompany);
             $('#uphone').val(response.data.phone);
             $('#unotification').val(response.data.notification);
-            $('#ulocked').val(response.data.locked);          
-            
-            // Show the modal
-            $('#editModal').modal('show');
+            $('#ulocked').val(response.data.locked); 
+        
+            var myArray = response.data.image;
+            $.each(myArray, function(index, img){
+            $('#oldPhoto').append(`  
+            <div class="d-inline-block me-2 image-container">
+            <img src="<?php echo base_url?>/image/${img}" class="img-thumbnail" "width="100px">
+            <a href="javascript:void(0);" class="badge badge-danger" id="deleteImage" data-id="${index}" data-uid="${response.data.id}">Delete</a>
+            </div>`);
+});
+        // Show the modal
+        $('#editModal').modal('show');
         },
         error: function (xhr, status, error) {
             console.error('AJAX Error:', status, error);
-
         },
     });
-
 });
-
 
 // update data using ajax 
 $('#update').on('click',function(e){
+
    e.preventDefault();
     let isValid = $('#editUser').valid();
     if(isValid){
-        let data = new FormData($("#editUser")[0]);        
-    
+
+    let data = new FormData($("#editUser")[0]);
+
         $.ajax({
            url: "<?php echo EXEC ?>Exec_User.php?task=edit",
            type:"POST",
@@ -531,7 +542,7 @@ $('#update').on('click',function(e){
             processData : false,
             contentType :false,
             success : function(response){
-               
+              
               if(response.statusCode == 200){
                 Swal.fire(
                     'Good job!'+response.message + '',
@@ -546,11 +557,10 @@ $('#update').on('click',function(e){
 });
 
 // Delete Data using ajax
-
 $(document).on('click','.deleteBtn',function(){
-
+    
      let id = $(this).data('id');
-    //console.log(id);
+   
             Swal.fire({     
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
@@ -583,9 +593,46 @@ $(document).on('click','.deleteBtn',function(){
         });
 });
 
+// Multiple Images Delete button
+$(document).on('click', '#deleteImage', function(){
+  
+    let imgId = $(this).data('id');
+    console.log(imgId); 
+    let uid = $(this).attr('data-uid');
+    console.log(uid);
+
+    let imgContainer = $(this).closest('.image-container'); 
+
+        $.ajax({
+            url: "<?php echo EXEC ?>Exec_User.php?task=deleteImage",
+            type: 'POST',
+            dataType : "JSON",
+            data:{ 
+                imgId: imgId,
+                uid : uid,
+            },
+            success: function(response){
+                //alert('open');
+         
+                if (response.statusCode == 200){
+                               
+                    imgContainer.fadeOut(300,function(){
+                        $(this).remove();
+                    });
+
+                    $('#userTable').DataTable().ajax.reload();
+                    console.log(response.message);
+
+                }else{
+                    console.log('Failed to delete image!');
+                }
+   
+            }
+        });
+});
+
 
         
 </script>
-
 </body>
 </html>
