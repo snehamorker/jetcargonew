@@ -31,7 +31,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
                     <span class="alert alert-danger" id="red-alert" style="display:none;" role="alert"></span>
 
                     <br>
-                    <form action="sendMail.php" id="forgotPwdForm" method="post"> 
+                    <form id="forgotPwdForm" method="post"> 
                     <div class="mb-3">
                         <label class="form-label">Email</label>
                         <input type="email" class="form-control" name="email" id="email">
@@ -39,7 +39,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
 
                     <div class="row">
                         <div class="col-12">
-                            <button type="submit" id="btnForgotPwd" class="btn btn-primary btn-block" name="forgotPwd">Reset Password</button>
+                            <button type="submit" id="btnForgotPwd" class="btn btn-primary btn-block" name="forgotPwd">Forgot Password</button>
                         </div>
                     </div>
                     <div>
@@ -62,9 +62,13 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
       <div class="modal-header justify-content-center">
         <h5 class="modal-title" id="exampleModalLabel">Enter the OTP</h5>
       </div>
-
-      <form id="otpModal" method="post">
+       
+      <form id="otpForm" method="POST">
       <div class="modal-body">
+
+      <span class="alert alert-success" id="green-alert" style="display:none;" role="alert"></span>
+      <span class="alert alert-danger" id="red-alert" style="display:none;" role="alert"></span>
+      <br>
 
     <div class="form-group mb-3 text-center">
     <label class="form-label">Please check your email for OTP</label>
@@ -72,7 +76,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/jetcargonew/Admin/db.class.php');
   </div>
      </div>
       </form>
-
+     
       <div class="modal-footer justify-content-center">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <input type="submit" class="btn btn-primary" value="Submit" id="btnSubmit"> 
@@ -102,9 +106,9 @@ $(document).ready(function(){
         errorClass: 'text-danger',
     });
 
-// OTP modal validation using javascript 
+// OTP form validation using javascript 
 $(document).ready(function(){
-    $('#otpModal').validate({
+    $('#otpForm').validate({
         rules:{
             otp:{
                 required:true
@@ -121,7 +125,7 @@ $(document).ready(function(){
 // forgot_password button  
 $(document).on('click','#btnForgotPwd',function(e){
     e.preventDefault();
-      
+  
     let mail = $('#email').val();
     console.log(mail);
   
@@ -133,57 +137,106 @@ $(document).on('click','#btnForgotPwd',function(e){
             mail : mail
         },
         success : function(response){
-            // console.log(response);
-            
-            if(response.StatusCode == 200){
-                setTimeout(function(){
-                window.location.href = "../sendMail.php";
-                $('#otpModal').modal('show');
-                $("#green-alert").css('display','none');
-                },3000);
+        
+        if(response.StatusCode == 200){
 
-                $('#green-alert').css('display','block');
-                $('#green-alert').html(response.message);
-                
-            }else{
-                $("#red-alert").css('display','block');
-                $("#red-alert").html(response.message);
+        $('#otpModal').modal('show');
 
-                setTimeout(function(){
-                  $("#red-alert").css('display','none');
-                },3000);
-                
-            }
-            }
-    });
-
-});
-
-// otp modal
-$(document).on('click','#btnSubmit',function(){
-
-    let otp = $('#otp').val();
-    console.log(otp);
-
-    $.ajax({
-        url: "<?php echo EXEC ?>Exec_User.php?task=otpCheck",
+        $.ajax({
+        url: "<?php echo EXEC ?>otpVerification.php?submit",
         type: 'post',
         dataType:'JSON',
+        data : {
+            otp : otp
+        },
         success : function(response){
-            // console.log(response);
 
-            if(response.statusCode == 200){
-                console.log(response.message);
+            console.log('res: ',response);
+
+          if(response.statusCode == 200){
+
+            setTimeout(function(){ 
+                  window.location.href = "./resetPassword.php";
+                  },1000);
+
+                  $('#green-alert').css('display','block');
+                  $('#green-alert').html(response.message);
+
+          }else
+
+            $("#red-alert").css('display','block');
+            $("#red-alert").html(response.message);
+            setTimeout(function(){
+                $("#red-alert").css('display','none');
+            },3000);
+          } 
+         
+          
+        });
+
+
+            //     setTimeout(function(){
+            //     // window.location.href = "../sendMail.php"; 
+            //     $('#otpModal').modal('show');
+            //     $("#green-alert").css('display','none');
+            //     },3000);
+
+            //     $('#green-alert').css('display','block');
+            //     $('#green-alert').html(response.message);
+                
+            // }else{
+            //     $("#red-alert").css('display','block');
+            //     $("#red-alert").html(response.message);
+
+            //     setTimeout(function(){
+            //       $("#red-alert").css('display','none');
+            //     },3000);
+                
             }
-        }
+            }
     });
-
 });
 
+// OTP modal
+// $(document).on('click','#btnSubmit',function(){
+    
+//     let otp = $('#otp').val();
+//     console.log(otp);
+
+//     $.ajax({
+//         // url: "<?php echo EXEC ?>otpVerification.php?submit",
+//         type: 'post',
+//         dataType:'JSON',
+//         data : {
+//             otp : otp
+//         },
+//         success : function(response){
+
+//             console.log('res: ',response);
+
+//           if(response.statusCode == 200){
+
+//             setTimeout(function(){ 
+//                   window.location.href = "./resetPassword.php";
+//                   },1000);
+
+//                   $('#green-alert').css('display','block');
+//                   $('#green-alert').html(response.message);
+
+//           }else
+
+//             $("#red-alert").css('display','block');
+//             $("#red-alert").html(response.message);
+//             setTimeout(function(){
+//                 $("#red-alert").css('display','none');
+//             },3000);
+//           } 
+         
+          
+//         });
+//     });
 
 });
-
-
 
 
 </script>
